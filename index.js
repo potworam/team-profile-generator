@@ -1,12 +1,19 @@
 const inquirer = require('inquirer');
 const fs = require('fs');
-const generatePage = require('./src/page-template.js');
+const {generateTemplate} = require('./src/page-template.js');
 const Employee = require('./lib/Employee.js');
 const Manager = require('./lib/Manager.js');
 const Engineer = require('./lib/Engineer.js');
 const Intern = require('./lib/Intern.js');
 
-const questions=[
+const employees = [];
+
+const continueQuestion = [{
+    type: 'confirm',
+    name: 'continue',
+    message: 'Would you like do add another user?',
+},]
+const generalEmployeeQuestions = [
     {
         type: 'input',
         message: 'Enter your name',
@@ -38,22 +45,30 @@ const questions=[
         name: 'school',
     },
     {
-        type:'list',
+        type: 'list',
         name: 'role',
         message: 'What is your role',
-        choices: [ 'Manager', 'Engineer', 'Intern']
-    },
+        choices: ['Manager', 'Engineer', 'Intern']
+    }
     //need to add function to add others and loop questions
 ]
- //need to add function to add page template or assign inquirer variables to the right place
-async function init(questions) {
-    let answers = await inquirer.prompt(questions)
-    console.log(answers)
-    await writeToFile("./index.html",answers)
-   return answers
+console.log(generateTemplate);
+//need to add function to add page template or assign inquirer variables to the right place
+async function promptEmployeeInfo(addAnother) {
+    if (!addAnother) {
+        const template = generateTemplate(employees);
 
+        console.log('here is your team template: ', template);
+        //  await writeToFile("./index.html",answers)
+        return
+    }
+    const employeeInfo = await inquirer.prompt(generalEmployeeQuestions);
+    console.log(employeeInfo)
+    employees.push(employeeInfo);
+    const { continue: shouldContinue } = await inquirer.prompt(continueQuestion);
+    promptEmployeeInfo(shouldContinue);
 }
 async function app() {
-    await init(questions);
+    await promptEmployeeInfo(true);
 }
 app();
